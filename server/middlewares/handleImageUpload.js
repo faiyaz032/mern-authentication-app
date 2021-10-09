@@ -5,7 +5,7 @@ const catchAsync = require('../utils/catchAsync');
 const processMulter = require('./../utils/processMulter');
 
 //handle image upload middleware
-const handleImageUpload = catchAsync((req, res, next) => {
+const handleImageUpload = catchAsync(async (req, res, next) => {
    //get the upload object by calling process multer
    const upload = processMulter();
 
