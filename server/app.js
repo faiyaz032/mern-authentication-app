@@ -11,11 +11,13 @@ const userRouter = require('./routers/userRouter');
 //initialise the express app
 const app = express();
 
+//enable cors
+app.use(cors({ origin: true, credentials: true }));
+
 //request parser
 app.use(express.json());
 
 //middlewares
-app.use(cors({ origin: true, credentials: true }));
 app.use(cookieParser());
 
 //root route of the app
