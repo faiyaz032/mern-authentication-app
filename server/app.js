@@ -20,7 +20,7 @@ app.use(cors({ origin: true, credentials: true }));
 //request parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+   
 //middlewares
 app.use(cookieParser());
 
