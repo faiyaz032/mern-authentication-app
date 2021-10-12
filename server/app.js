@@ -1,9 +1,12 @@
 //dependencies
 const express = require('express');
 const dotenv = require('dotenv').config();
+const GoogleStrategyConfig = require('./utils/auth/GoogleStrategyConfig');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const cookieSession = require('cookie-session');
+const passport = require('passport');
 
 //internal-imports
 const { notFoundHandler, defaultErrorHandler } = require('./middlewares/errorHandlers');
@@ -20,9 +23,19 @@ app.use(cors({ origin: true, credentials: true }));
 //request parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-   
+
 //middlewares
+app.use(
+   cookieSession({
+      maxAge: process.env.EXPIRY_TIME,
+      keys: [process.env.COOKIE_SECRET_KEY],
+   })
+);
 app.use(cookieParser());
+
+//initialise passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 //set static folder
 if (process.env.NODE_ENV === 'production') {

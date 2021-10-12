@@ -58,4 +58,16 @@ const login = catchAsync(async (req, res, next) => {
    }
 });
 
-module.exports = { signup, login };
+//handle strategy for oauth
+const handleStrategy = async function (accessToken, refreshToken, profile, done) {
+   const { name, email, picture: image } = profile._json;
+   const user = await User.findOne({ email: email });
+   if (user && user._id) {
+      done(null, user);
+   } else {
+      const newUser = await User.create({ name, email, image });
+      done(null, newUser);
+   }
+};
+
+module.exports = { signup, login, handleStrategy };
