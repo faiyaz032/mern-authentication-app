@@ -2,7 +2,7 @@
 const express = require('express');
 const passport = require('passport');
 //internal imports
-const { signup, login } = require('../controllers/AuthController');
+const { signup, login, forgetPassword, resetPassword } = require('../controllers/AuthController');
 const checkLogin = require('../middlewares/auth/checkLogin');
 const handleImageUpload = require('../middlewares/handleImageUpload');
 
@@ -12,6 +12,10 @@ const router = express.Router();
 //user authentication routes
 router.post('/signup', handleImageUpload, signup);
 router.post('/login', login);
+
+//reset password routes
+router.post('/forget-password', forgetPassword);
+router.patch('/reset-password/:token', resetPassword);
 
 router.get(
    '/auth/google',
