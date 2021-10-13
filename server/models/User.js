@@ -1,6 +1,7 @@
 //dependencies
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+const bycrpt = require('bcrypt');
 
 //create user schema
 const userSchema = mongoose.Schema(
@@ -23,9 +24,16 @@ userSchema.methods.createPasswordResetToken = function () {
 
    this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
    this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-   console.log({ resetToken }, this.passwordResetToken);
    return resetToken;
 };
+
+//hash the  password
+userSchema.pre('save', async function (next) {
+   //only run the function if the password is actually modified
+   if (!this.isModified('password')) return next();
+   this.password = await bycrpt.hash(this.password, 10);
+   next();
+});
 
 //create User model
 const User = mongoose.model('user', userSchema);

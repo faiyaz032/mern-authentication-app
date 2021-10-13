@@ -2,6 +2,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const AppError = require('../utils/AppError');
+const crypto = require('crypto');
 
 //internal imports
 const catchAsync = require('../utils/catchAsync');
@@ -101,6 +102,37 @@ const forgetPassword = catchAsync(async (req, res, next) => {
    }
 });
 
-const resetPassword = catchAsync(async (req, res, next) => {});
+const resetPassword = catchAsync(async (req, res, next) => {
+   //get the user based on the token
+   const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+   const user = await User.findOne({ PasswordResetToken: hashedToken, passwordResetExpires: { $gt: Date.now() } });
+
+   //If the token is not expired, set the new password
+   if (!user) {
+      return next(new AppError(400, 'Token is invalid or has expired'));
+   }
+
+   //update changedPasswordAt property for the current user
+   user.password = req.body.password;
+   user.PasswordResetToken = undefined;
+   user.passwordResetExpires = undefined;
+   await user.save();
+   //log the user in, send JWT
+   const userObjectForToken = {
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+   };
+   const token = jwt.sign(userObjectForToken, process.env.JWT_SECRET_KEY, {
+      expiresIn: process.env.EXPIRY_TIME,
+   });
+   res.cookie(process.env.COOKIE_NAME, token, {
+      maxAge: process.env.EXPIRY_TIME,
+      httpOnly: true,
+      secure: false, //TODO: need to make it false when we deploy the server to production
+      sameSite: 'none',
+   });
+   res.status(200).json({ status: 'success', message: 'Password changed successfully' });
+});
 
 module.exports = { signup, login, handleStrategy, forgetPassword, resetPassword };
