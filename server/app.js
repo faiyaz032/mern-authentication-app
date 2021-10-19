@@ -10,11 +10,10 @@ const passport = require('passport');
 
 //internal-imports
 const { notFoundHandler, defaultErrorHandler } = require('./middlewares/errorHandlers');
-
-//internal imports
+const authRouter = require('./routers/authRouter');
 const userRouter = require('./routers/userRouter');
 
-//initialise the express app
+//initialse express app
 const app = express();
 
 //enable cors
@@ -36,7 +35,6 @@ app.use(cookieParser());
 //initialise passport
 app.use(passport.initialize());
 app.use(passport.session());
-
 //set static folder
 if (process.env.NODE_ENV === 'production') {
    app.use(express.static('client/build'));
@@ -50,6 +48,7 @@ app.get('/', (req, res, next) => {
 });
 
 //routers
+app.use('/api/user', authRouter);
 app.use('/api/user', userRouter);
 
 //error middlewares
